@@ -49,9 +49,21 @@
 							<div class="card-body">
 								<p class="card-text">
 								<h4>
-									<a
+									<c:choose>
+
+										<c:when test="${not empty article.articleLink}">
+										<a
 										style="color: #111; text-decoration: none; font-size: 18px; font-weight: bold;"
 										target="_blank" href=${article.articleLink}>${article.header}</a>
+										</c:when>
+										<c:otherwise>
+											<span
+										style="color: #111; text-decoration: none; font-size: 18px; font-weight: bold;"
+										>${article.header}</span>
+										</c:otherwise>
+									</c:choose>
+
+									
 								</h4>
 								</p>
 								<h7 style="font-family: 'Merienda';"><fmt:formatDate pattern="dd-MMM-yyyy" value="${article.publishedDate}"/></h7>

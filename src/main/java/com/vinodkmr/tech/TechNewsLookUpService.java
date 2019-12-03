@@ -47,7 +47,7 @@ public class TechNewsLookUpService {
 	private List<String> HackerNoonURLList;	
 
 
-	@Scheduled(fixedRate =  100000)
+	@Scheduled(fixedRate =  10000)
 	public void scheduleTaskWithFixedRate() throws ParseException{
 		hackerNoonLookUp();
 		inshortsLookUp();		
@@ -125,11 +125,6 @@ public class TechNewsLookUpService {
 		return calendar;
 	}
 
-	private void limitArticleListSize() {
-		if(techArticleList.size() > Constants.MAX_ARTICLE) {
-			techArticleList.subList(100, techArticleList.size()).clear();
-		}
-	}
 
 	private void inshortsLookUp() throws ParseException {
 
@@ -140,25 +135,51 @@ public class TechNewsLookUpService {
 			ioe.printStackTrace(); 
 		}
 
-		Elements elements = doc.select("div.news-card.z-depth-1");
+
+		Elements elements = doc.selectFirst("div.card-stack").children();
 		for(Element element : elements) {
-			String header = element.select("[itemprop='headline']").first().ownText();
-			String backgroundImgLink = element.selectFirst("div.news-card-image").attr("style");
-			System.out.println("article header "+header);
-			String imageLink = backgroundImgLink.substring(backgroundImgLink.indexOf("http"), 
-					backgroundImgLink.indexOf("?"));
+			Element newsCardElement = element.selectFirst("div.news-card.z-depth-1");
+			if(newsCardElement != null) {
 
-			String publishedDate = element.selectFirst("span.date").ownText();
-			String articleLink = element.selectFirst("a.clickable").absUrl("href");
-			int articleDay = Integer.parseInt(publishedDate.split(" ")[0]);
-			int articleMonth =  new SimpleDateFormat("MMM").parse(publishedDate.split(" ")[1].toUpperCase()).getMonth()+1;
+				String header = newsCardElement.select("[itemprop='headline']").first().ownText();
+				String backgroundImgLink = newsCardElement.selectFirst("div.news-card-image").attr("style");
+				System.out.println("article header "+header);
+				String imageLink = backgroundImgLink.substring(backgroundImgLink.indexOf("http"), 
+						backgroundImgLink.indexOf("?"));
 
-			Calendar calendar = setTime(publishedDate, articleDay, articleMonth);
 
-			techArticleList.add(new TechArticle(header, imageLink, articleLink, calendar.getTime()));
+				if(techArticleList.size() > 0) {
+					if(techArticleList.stream().
+							filter(article -> article.getHeader().
+									equalsIgnoreCase(header)).count() > 0) {
+						String nextElementHeader = 
+								element.nextElementSibling() != null?
+										element.nextElementSibling().select("[itemprop='headline']").first().ownText():
+											"";
+										if(techArticleList.stream().
+												filter(article -> article.getHeader()
+														.equalsIgnoreCase(nextElementHeader)).count()>0) {
+											System.out.println("Duplicate "+nextElementHeader);
+											break;
+										}else {
+											continue;
+										}
+					}
+				}
 
-			System.out.println(calendar.getTime());
+				String articleLink = null;
 
+				String publishedDate = newsCardElement.selectFirst("span.date").ownText();
+				if(newsCardElement.selectFirst("a.source") != null)
+					articleLink = newsCardElement.selectFirst("a.source").absUrl("href");
+
+				int articleDay = Integer.parseInt(publishedDate.split(" ")[0]);
+				int articleMonth =  new SimpleDateFormat("MMM").parse(publishedDate.split(" ")[1].toUpperCase()).getMonth()+1;
+
+				Calendar calendar = setTime(publishedDate, articleDay, articleMonth);
+
+				techArticleList.add(new TechArticle(header, imageLink, articleLink, calendar.getTime()));
+			}
 		}
 
 	}
@@ -187,6 +208,15 @@ public class TechNewsLookUpService {
 			modelAndView.addObject("endIndex", index+1);
 		return modelAndView;
 	}
+
+	private void limitArticleListSize() {
+		if(techArticleList.size() > Constants.MAX_ARTICLE) {
+			techArticleList.subList(100, techArticleList.size()).clear();
+		}
+
+		System.out.println(techArticleList.size());
+	}
+
 
 
 }
