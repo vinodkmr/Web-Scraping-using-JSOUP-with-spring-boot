@@ -47,7 +47,7 @@ public class TechNewsLookUpService {
 	private List<String> HackerNoonURLList;	
 
 
-	@Scheduled(cron = "1 1 * ? * *")
+	@Scheduled(cron = "1 1 * ? * *", , zone = "Asia/Calcutta")
 	public void scheduleTaskWithFixedRate() throws ParseException{
 		hackerNoonLookUp();
 		inshortsLookUp();		
