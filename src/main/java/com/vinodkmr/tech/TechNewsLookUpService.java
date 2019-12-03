@@ -47,7 +47,7 @@ public class TechNewsLookUpService {
 	private List<String> HackerNoonURLList;	
 
 
-	@Scheduled(fixedRate =  10000)
+	@Scheduled(cron = "0 0 0-23 * * *")
 	public void scheduleTaskWithFixedRate() throws ParseException{
 		hackerNoonLookUp();
 		inshortsLookUp();		
