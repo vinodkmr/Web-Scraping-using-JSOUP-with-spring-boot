@@ -188,7 +188,7 @@ public class TechNewsLookUpService {
 	@GetMapping("/")
 	public ModelAndView showHome() {
 		//This is only for heroku as scheduler is not working
-		scheduleTaskWithFixedRate()
+		scheduleTaskWithFixedRate();
 		ModelAndView modelAndView = new ModelAndView("home");
 		modelAndView.addObject("newsList", techArticleList.subList(0, 20));
 		modelAndView.addObject("endIndex",2);
