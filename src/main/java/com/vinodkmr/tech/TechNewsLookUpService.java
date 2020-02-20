@@ -186,7 +186,7 @@ public class TechNewsLookUpService {
 	}
 
 	@GetMapping("/")
-	public ModelAndView showHome() {
+	public ModelAndView showHome() throws ParseException{
 		//This is only for heroku as scheduler is not working
 		scheduleTaskWithFixedRate();
 		ModelAndView modelAndView = new ModelAndView("home");
